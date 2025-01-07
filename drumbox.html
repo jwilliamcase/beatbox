@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Drum Machine</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ffa500;
+      font-family: monospace;
+      margin: 0;
+      padding: 0;
+      /* Center the entire page content horizontally/vertically */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      /* Center the two main sections (pads, sequencer) vertically */
+      align-items: center;
+      justify-content: center;
+      gap: 50px;
+      padding: 20px;
+    }
+
+    /* DRUM PADS SECTION */
+    .drum-pads {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 20px;
+    justify-content: center;
+  }
+
+    .drum-pad {
+      display: flex;
+      align-items: center;
+      border: 2px solid #ffa500;
+      border-radius: 5px;
+      background-color: #000;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      padding: 10px;
+      /* fixed width so they line up nicely; adjust as you like */
+      width: 180px;
+      height: 80px;
+      position: relative;
+    }
+
+    .drum-pad:active {
+      background-color: #db7000;
+    }
+
+    .drum-pad.active {
+      background-color: #ff8c00;
+      outline: 2px solid #ffa500;
+    }
+
+    /* The left-side controls container */
+    .pad-controls-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-right: 10px;
+      gap: 10px;
+    }
+
+    /* The label on the right of the knobs */
+    .pad-label {
+      font-weight: bold;
+      font-size: 1.1em;
+      flex: 1; /* push label to the right */
+    }
+
+    /* Orange round 'knob' style for range inputs */
+    input[type="range"].knob {
+      -webkit-appearance: none; /* Remove default slider look */
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(ellipse at center, #ffa500 0%, #cc7000 90%);
+      border-radius: 50%;
+      transform: rotate(-90deg); /* Make it vertical like a knob */
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid #aa6500;
+    }
+    /* Remove outline on focus */
+    input[type="range"].knob:focus {
+      outline: none;
+    }
+    /* Chrome/Safari slider thumb */
+    input[type="range"].knob::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      background: #000;
+      width: 0.1px;
+      height: 0.1px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 7px #000; /* small black dot in center */
+      cursor: pointer;
+    }
+    /* Firefox slider thumb */
+    input[type="range"].knob::-moz-range-thumb {
+      background: #000;
+      border: none;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    /* SEQUENCER WRAPPER*/ 
+
+  
+  .sequencer-container-wrapper {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Left labels and sequencer */
+    align-items: left; /* Align rows vertically */
+  }
+
+
+    /* SEQUENCER SECTION */
+    .sequencer-container {
+      border: 2px solid ;
+      display: grid;
+      flex-direction: column;
+      align-items: center; /* center horizontally within the container */
+    }
+
+    /* We'll use grid for step numbers and each sequencer row */
+    .step-numbers,
+    .sequencer-row {
+      display: grid;
+      grid-template-columns: repeat(16, 30px);
+      gap: 4px;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .step-number {
+      text-align: center;
+      line-height: 30px;
+    }
+
+    /* We'll use grid for row labels and each sequenced instrument */
+    .inst-labels {
+    display: grid;
+    grid-template-rows: repeat(9, 32px); /* Match the number of rows */
+    align-items: center; /* Align labels vertically */
+    gap: 10px;
+    padding-right: 5px;
+}
+
+.inst-label {
+    display: flex;
+    align-items: center;
+    justify-content: left; /* Centers text horizontally */
+    height: 34px; /* Match the row height */
+    font-size: 0.9em; /* Adjust text size if needed */
+
+}
+
+
+    .sequencer-step {
+      width: flex;
+      height: 30px;
+      border: 1px solid #ffa500;
+      border-radius: 5px;
+      background-color: #000;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .sequencer-step.active {
+      background-color: #ff8c00;
+    }
+
+    .sequencer-step.strong-beat {
+      background-color: #333;
+    }
+    .sequencer-step.strong-beat.active {
+      background-color: #cc6600;
+    }
+
+    .sequencer-row-label {
+      text-align: right;
+      padding-right: 5px;
+    }
+
+    /* CONTROL BUTTONS AND TEMPO AREA */
+    .controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Adjust spacing between buttons */
+    width: 100%; /* Ensure it spans the container width */
+    padding: 10px;
+    }
+
+
+
+    button {
+      background-color: #ffa500;
+      color: #000;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:active {
+      background-color: #db7000;
+    }
+
+    .tempo-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    label {
+      color: #ffa500;
+      font-size: 1em;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      background-color: transparent;
+      color: #ffa500;
+      border: 1px solid #ffa500;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- DRUM PADS -->
+    <div class="drum-pads">
+      <!-- 1) Kick -->
+      <div class="drum-pad" data-sound="kick">
+        <div class="pad-controls-left">
+          <input type="range" class="knob volume-knob" min="0" max="1" step="0.01" value="1" title="Kick Volume">
+          <input type="range" class="knob pitch-knob" min="0.25" max="4" step="0.01" value="1" title="Kick Pitch">
+        </div>
+        <div class="pad-label">Kick</div>
+      </div>
+
+      <!-- 2) Snare -->
+      <div class="drum-pad" data-sound="snare">
+        <div class="pad-controls-left">
+          <input type="range" class="knob volume-knob" min="0" max="1" step="0.01" value="1" title="Snare Volume">
+          <input type="range" class="knob pitch-knob" min="0.25" max="4" step="0.01" value="1" title="Snare Pitch">
+        </div>
+        <div class="pad-label">Snare</div>
+      </div>
+
+      <!-- 3) Hi-Hat -->
+      <div class="drum-pad" data-sound="hihat">
+        <div class="pad-controls-left">
+          <input type="range" class="knob volume-knob" min="0" max="1" step="0.01" value="1" title="Hi-Hat Volume">
+          <input type="range" class="knob pitch-knob" min="0.25" max="4" step="0.01" value="1" title="Hi-Hat Pitch">
+        </div>
+        <div class="pad-label">Hi-Hat</div>
+      </div>
+
+      <!-- 4) Tom -->
+      <div class="drum-pad" data-sound="tom">
+        <div class="pad-controls-left">
+          <input type="range" class="knob volume-knob" min="0" max="1" step="0.01" value="1" title="Tom Volume">
+          <input type="range" class="knob pitch-knob" min="0.25" max="4" step="0.01" value="1" title="Tom Pitch">
+        </div>
+        <div class="pad-label">Tom</div>
+      </div>
+
+      <!-- 5) Clap -->
+      <div class="drum-pad" data-sound="clap">
+        <div class="pad-controls-left">
+          <input type="range" class="knob volume-knob" min="0" max="1" step="0.01" value="1" title="Clap Volume">
+          <input type="range" class="knob pitch-knob" min="0.25" max="4" step="0.01" value="1" title="Clap Pitch">
+        </div>
+        <div class="pad-label">Clap</div>
+      </div>
+
+      <!-- 6) Rim -->
+      <div class="drum-pad" data-sound="rim">
+        <div class="pad-controls-left">
+          <input type="range" class="knob volume-knob" min="0" max="1" step="0.01" value="1" title="Rim Volume">
+          <input type="range" class="knob pitch-knob" min="0.25" max="4" step="0.01" value="1" title="Rim Pitch">
+        </div>
+        <div class="pad-label">Rim</div>
+      </div>
+
+      <!-- 7) Cowbell -->
+      <div class="drum-pad" data-sound="cowbell">
+        <div class="pad-controls-left">
+          <input type="range" class="knob volume-knob" min="0" max="1" step="0.01" value="1" title="Cowbell Volume">
+          <input type="range" class="knob pitch-knob" min="0.25" max="4" step="0.01" value="1" title="Cowbell Pitch">
+        </div>
+        <div class="pad-label">Cowbell</div>
+      </div>
+
+      <!-- 8) Ride -->
+      <div class="drum-pad" data-sound="ride">
+        <div class="pad-controls-left">
+          <input type="range" class="knob volume-knob" min="0" max="1" step="0.01" value="1" title="Ride Volume">
+          <input type="range" class="knob pitch-knob" min="0.25" max="4" step="0.01" value="1" title="Ride Pitch">
+        </div>
+        <div class="pad-label">Ride</div>
+      </div>
+
+    </div>
+
+    <!-- SEQUENCER -->
+    <div class="sequencer-container-wrapper">
+
+     <!-- Step inst-labels -->
+        
+     <div class="inst-labels">
+      <!-- 8 ROWS -->
+      <div class="inst-label">VOICE</div>
+      <div class="inst-label">KICK</div>
+      <div class="inst-label">SNARE</div>
+      <div class="inst-label">HIHAT</div>
+      <div class="inst-label">TOM</div>
+      <div class="inst-label">CLAP</div>
+      <div class="inst-label">RIM</div>
+      <div class="inst-label">DINK</div>
+      <div class="inst-label">RIDE</div>
+    </div>
+    
+    <div class="sequencer-container">
+      <!-- Step Numbers -->
+      <div class="step-numbers">
+        <!-- 16 steps -->
+        <div class="step-number">1</div>
+        <div class="step-number">2</div>
+        <div class="step-number">3</div>
+        <div class="step-number">4</div>
+        <div class="step-number">5</div>
+        <div class="step-number">6</div>
+        <div class="step-number">7</div>
+        <div class="step-number">8</div>
+        <div class="step-number">9</div>
+        <div class="step-number">10</div>
+        <div class="step-number">11</div>
+        <div class="step-number">12</div>
+        <div class="step-number">13</div>
+        <div class="step-number">14</div>
+        <div class="step-number">15</div>
+        <div class="step-number">16</div>
+      </div>
+
+      <!-- Kick row -->
+      <div class="sequencer-row">
+        <div class="sequencer-step strong-beat" data-sound="kick" data-step="0"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="1"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="2"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="3"></div>
+        <div class="sequencer-step strong-beat" data-sound="kick" data-step="4"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="5"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="6"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="7"></div>
+        <div class="sequencer-step strong-beat" data-sound="kick" data-step="8"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="9"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="10"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="11"></div>
+        <div class="sequencer-step strong-beat" data-sound="kick" data-step="12"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="13"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="14"></div>
+        <div class="sequencer-step" data-sound="kick" data-step="15"></div>
+      </div>
+
+      <!-- Snare row -->
+      <div class="sequencer-row">
+        <div class="sequencer-step strong-beat" data-sound="snare" data-step="0"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="1"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="2"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="3"></div>
+        <div class="sequencer-step strong-beat" data-sound="snare" data-step="4"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="5"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="6"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="7"></div>
+        <div class="sequencer-step strong-beat" data-sound="snare" data-step="8"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="9"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="10"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="11"></div>
+        <div class="sequencer-step strong-beat" data-sound="snare" data-step="12"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="13"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="14"></div>
+        <div class="sequencer-step" data-sound="snare" data-step="15"></div>
+      </div>
+
+      <!-- Hi-hat row -->
+      <div class="sequencer-row">
+        <div class="sequencer-step strong-beat" data-sound="hihat" data-step="0"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="1"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="2"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="3"></div>
+        <div class="sequencer-step strong-beat" data-sound="hihat" data-step="4"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="5"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="6"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="7"></div>
+        <div class="sequencer-step strong-beat" data-sound="hihat" data-step="8"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="9"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="10"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="11"></div>
+        <div class="sequencer-step strong-beat" data-sound="hihat" data-step="12"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="13"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="14"></div>
+        <div class="sequencer-step" data-sound="hihat" data-step="15"></div>
+      </div>
+
+      <!-- Tom row -->
+      <div class="sequencer-row">
+        <div class="sequencer-step strong-beat" data-sound="tom" data-step="0"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="1"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="2"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="3"></div>
+        <div class="sequencer-step strong-beat" data-sound="tom" data-step="4"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="5"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="6"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="7"></div>
+        <div class="sequencer-step strong-beat" data-sound="tom" data-step="8"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="9"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="10"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="11"></div>
+        <div class="sequencer-step strong-beat" data-sound="tom" data-step="12"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="13"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="14"></div>
+        <div class="sequencer-step" data-sound="tom" data-step="15"></div>
+      </div>
+
+      <!-- Clap row -->
+      <div class="sequencer-row">
+        <div class="sequencer-step strong-beat" data-sound="clap" data-step="0"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="1"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="2"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="3"></div>
+        <div class="sequencer-step strong-beat" data-sound="clap" data-step="4"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="5"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="6"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="7"></div>
+        <div class="sequencer-step strong-beat" data-sound="clap" data-step="8"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="9"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="10"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="11"></div>
+        <div class="sequencer-step strong-beat" data-sound="clap" data-step="12"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="13"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="14"></div>
+        <div class="sequencer-step" data-sound="clap" data-step="15"></div>
+      </div>
+
+      <!-- Rim row -->
+      <div class="sequencer-row">
+        <div class="sequencer-step strong-beat" data-sound="rim" data-step="0"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="1"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="2"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="3"></div>
+        <div class="sequencer-step strong-beat" data-sound="rim" data-step="4"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="5"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="6"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="7"></div>
+        <div class="sequencer-step strong-beat" data-sound="rim" data-step="8"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="9"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="10"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="11"></div>
+        <div class="sequencer-step strong-beat" data-sound="rim" data-step="12"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="13"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="14"></div>
+        <div class="sequencer-step" data-sound="rim" data-step="15"></div>
+      </div>
+
+      <!-- Cowbell row -->
+      <div class="sequencer-row">
+        <div class="sequencer-step strong-beat" data-sound="cowbell" data-step="0"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="1"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="2"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="3"></div>
+        <div class="sequencer-step strong-beat" data-sound="cowbell" data-step="4"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="5"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="6"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="7"></div>
+        <div class="sequencer-step strong-beat" data-sound="cowbell" data-step="8"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="9"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="10"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="11"></div>
+        <div class="sequencer-step strong-beat" data-sound="cowbell" data-step="12"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="13"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="14"></div>
+        <div class="sequencer-step" data-sound="cowbell" data-step="15"></div>
+      </div>
+
+      <!-- Ride row -->
+      <div class="sequencer-row">
+        <div class="sequencer-step strong-beat" data-sound="ride" data-step="0"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="1"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="2"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="3"></div>
+        <div class="sequencer-step strong-beat" data-sound="ride" data-step="4"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="5"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="6"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="7"></div>
+        <div class="sequencer-step strong-beat" data-sound="ride" data-step="8"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="9"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="10"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="11"></div>
+        <div class="sequencer-step strong-beat" data-sound="ride" data-step="12"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="13"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="14"></div>
+        <div class="sequencer-step" data-sound="ride" data-step="15"></div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="controls">
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <div class="tempo-control">
+          <label for="tempo">Tempo:</label>
+          <input type="number" id="tempo" min="60" max="240" value="120">
+          <span id="tempoValue">120 BPM</span>
+        </div>
+        <button id="reset">Reset</button>
+        <button id="randomize">Roll Dice</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    // Create Audio objects
+    const kick = new Audio('./kick.wav');
+    const snare = new Audio('./snare.wav');
+    const hihat = new Audio('./hihat.wav');
+    const tom = new Audio('./tom.wav');
+    const clap = new Audio('./clap.wav');
+    const rim = new Audio('./rim.wav');
+    const cowbell = new Audio('./cowbell.wav');
+    const ride = new Audio('./ride.wav');
+
+    // Store each sample's settings (volume + pitch)
+    let sampleSettings = {
+      kick:    { volume: 1, pitch: 1 },
+      snare:   { volume: 1, pitch: 1 },
+      hihat:   { volume: 1, pitch: 1 },
+      tom:     { volume: 1, pitch: 1 },
+      clap:    { volume: 1, pitch: 1 },
+      rim:     { volume: 1, pitch: 1 },
+      cowbell: { volume: 1, pitch: 1 },
+      ride:    { volume: 1, pitch: 1 }
+    };
+
+    // Elements
+    const drumPads = document.querySelectorAll('.drum-pad');
+    const startButton = document.getElementById('start');
+    const stopButton = document.getElementById('stop');
+    const resetButton = document.getElementById('reset');
+    const tempoInput = document.getElementById('tempo');
+    const tempoValue = document.getElementById('tempoValue');
+    const sequencerSteps = document.querySelectorAll('.sequencer-step');
+
+    // State
+    let isPlaying = false;
+    let currentStep = 0;
+    let intervalId;
+    let tempo = 120;
+
+    // Set up pads (click to trigger sound, volume/pitch knob changes)
+    drumPads.forEach((pad) => {
+      const sound = pad.dataset.sound;
+      const volumeKnob = pad.querySelector('.volume-knob');
+      const pitchKnob = pad.querySelector('.pitch-knob');
+
+      // Click the pad to play the sample
+      pad.addEventListener('click', () => {
+        playSound(sound);
+        pad.classList.add('active');
+        setTimeout(() => pad.classList.remove('active'), 200);
+      });
+
+      // Update our sampleSettings on range input
+      volumeKnob.addEventListener('input', () => {
+        sampleSettings[sound].volume = parseFloat(volumeKnob.value);
+      });
+      pitchKnob.addEventListener('input', () => {
+        sampleSettings[sound].pitch = parseFloat(pitchKnob.value);
+      });
+    });
+
+    // Toggle steps active on click
+    sequencerSteps.forEach(step => {
+      step.addEventListener('click', () => {
+        step.classList.toggle('active');
+      });
+    });
+
+    // Core playSound function
+    function playSound(sound) {
+      let audioEl;
+      switch (sound) {
+        case 'kick':    audioEl = kick;    break;
+        case 'snare':   audioEl = snare;   break;
+        case 'hihat':   audioEl = hihat;   break;
+        case 'tom':     audioEl = tom;     break;
+        case 'clap':    audioEl = clap;    break;
+        case 'rim':     audioEl = rim;     break;
+        case 'cowbell': audioEl = cowbell; break;
+        case 'ride':    audioEl = ride;    break;
+      }
+      if (!audioEl) return;
+
+      // Reset time, set volume & pitch, play
+      audioEl.currentTime = 0;
+      audioEl.volume = sampleSettings[sound].volume;
+      audioEl.playbackRate = sampleSettings[sound].pitch;
+      audioEl.play();
+    }
+
+    // Sequencer step function
+    function playStep() {
+      // Check all steps for the current index
+      sequencerSteps.forEach(step => {
+        if (parseInt(step.dataset.step) === currentStep) {
+          if (step.classList.contains('active')) {
+            playSound(step.dataset.sound);
+          }
+        }
+      });
+      // Move to next step (0-15)
+      currentStep = (currentStep + 1) % 16;
+    }
+
+    // Start the sequencer
+    function startSequencer() {
+      if (!isPlaying) {
+        isPlaying = true;
+        const interval = (60 / tempo) * 1000 / 4;
+        intervalId = setInterval(playStep, interval);
+      }
+    }
+
+    // Stop the sequencer
+    function stopSequencer() {
+      clearInterval(intervalId);
+      isPlaying = false;
+      currentStep = 0;
+    }
+
+    // Reset the sequencer (clear all active steps)
+    function resetSequencer() {
+      sequencerSteps.forEach(step => step.classList.remove('active'));
+      currentStep = 0;
+    }
+
+// Randomize the sequencer (randomly activate steps)
+function randomizeSequencer() {
+  sequencerSteps.forEach(step => {
+    // Set active state with a 50% chance (adjust as needed)
+    if (Math.random() > 0.8) {
+      step.classList.add('active');
+    } else {
+      step.classList.remove('active');
+    }
+  });
+}
+
+    // Start button
+    startButton.addEventListener('click', startSequencer);
+
+    // Stop button
+    stopButton.addEventListener('click', stopSequencer);
+
+    // Reset button
+    resetButton.addEventListener('click', resetSequencer);
+
+    // Randomize button
+    const randomizeButton = document.getElementById('randomize');
+    randomizeButton.addEventListener('click', randomizeSequencer);
+
+
+    // Tempo input
+    tempoInput.addEventListener('input', () => {
+      tempo = parseInt(tempoInput.value);
+      tempoValue.textContent = tempo + ' BPM';
+
+      // If playing, reset interval for new tempo
+      if (isPlaying) {
+        clearInterval(intervalId);
+        const interval = (60 / tempo) * 1000 / 4;
+        intervalId = setInterval(playStep, interval);
+      }
+    });
+
+    // Space bar to toggle start/stop
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (isPlaying) {
+          stopSequencer();
+        } else {
+          startSequencer();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
