@@ -3,166 +3,8 @@
 <head>
     <title>Drum Machine - Web Audio API</title>
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        /* Same CSS as before */
-        body { 
-            background-color: #000; 
-            color: #ffa500; 
-            font-family: monospace; 
-            margin: 0; 
-            padding: 20px; 
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh; 
-        }
-        .container { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 30px; 
-            max-width: 1000px; 
-            width: 100%; 
-        }
-        .drum-pads { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 15px; 
-            width: 100%; 
-        }
-        .drum-pad { 
-            display: flex; 
-            align-items: center; 
-            border: 2px solid #ffa500; 
-            border-radius: 8px; 
-            padding: 12px; 
-            background: #111; 
-            cursor: pointer; 
-            transition: transform 0.1s; 
-        }
-        .drum-pad:active { 
-            transform: scale(0.95); 
-        }
-        .pad-controls-left { 
-            display: flex; 
-            gap: 8px; 
-            margin-right: 12px; 
-        }
-        .knob-container { 
-            position: relative; 
-            width: 50px; 
-            height: 70px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-        }
-        .knob-label { 
-            font-size: 0.7em; 
-            color: #ffa500; 
-            margin-top: 4px; 
-            text-align: center; 
-        }
-        input[type="range"].vertical { 
-            -webkit-appearance: slider-vertical; 
-            width: 30px; 
-            height: 50px; 
-            background: transparent; 
-            cursor: pointer; 
-        }
-        .sequencer-container-wrapper { 
-            display: grid; 
-            grid-template-columns: auto 2fr; 
-            width: auto; 
-            overflow-x: auto; 
-        }
-        .inst-labels { 
-            display: grid; 
-            grid-template-rows: repeat(9, 32px); 
-            align-items: center; 
-            gap: 10px; 
-            padding-right: 15px; 
-        }
-        .inst-label { 
-            height: 34px; 
-            display: flex; 
-            align-items: center; 
-            font-size: 0.9em; 
-        }
-        .sequencer-container { 
-            display: grid; 
-            gap: 4px; 
-        }
-        .step-numbers {
-            display: grid; 
-            grid-template-columns: repeat(16, 32px); 
-            gap: 4px; 
-            margin-bottom: 10px; 
-        }
-        .step-number { 
-            text-align: center; 
-            line-height: 30px; 
-        }
-        .sequencer-row { 
-            display: grid; 
-            grid-template-columns: repeat(16, 32px); 
-            gap: 4px; 
-        }
-        .sequencer-step { 
-            width: 30px; 
-            height: 30px; 
-            border: 1px solid #ffa500; 
-            border-radius: 3px; 
-            background: #111; 
-            cursor: pointer; 
-            transition: all 0.1s; 
-        }
-        .sequencer-step.active { 
-            background: #ff8c00; 
-        }
-        .sequencer-step.current { 
-            box-shadow: 0 0 10px #ffa500; 
-            transform: scale(1.1); 
-        }
-        .step-number.current { 
-            color: #ff4500; 
-            font-weight: bold; 
-        }
-        /* Strong beat styling */
-        .sequencer-step.strong-beat {
-            background-color: #333;
-            border-color: #ff8c00;
-        }
-        .sequencer-step.strong-beat.active {
-            background-color: #cc6600;
-        }
-        .controls { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 10px; 
-            justify-content: center; 
-            width: 100%; 
-            padding: 10px; 
-        }
-        button { 
-            background: #ffa500; 
-            color: #000; 
-            border: none; 
-            padding: 8px 16px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            transition: opacity 0.2s; 
-        }
-        button:active { 
-            opacity: 0.8; 
-        }
-        @media (max-width: 768px) { 
-            .drum-pads { grid-template-columns: repeat(2, 1fr); } 
-            .drum-pad { padding: 8px; } 
-            .knob-container { width: 40px; } 
-            .sequencer-container-wrapper { transform: scale(0.95); } 
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
     <div class="container">
         <!-- DRUM PADS -->
@@ -290,37 +132,38 @@
 
         <!-- SEQUENCER -->
         <div class="sequencer-container-wrapper">
-            <div class="inst-labels">
-                <div class="inst-label"> </div>
-                <div class="inst-label">KICK</div>
-                <div class="inst-label">SNARE</div>
-                <div class="inst-label">HIHAT</div>
-                <div class="inst-label">TOM</div>
-                <div class="inst-label">CLAP</div>
-                <div class="inst-label">RIM</div>
-                <div class="inst-label">COWBELL</div>
-                <div class="inst-label">RIDE</div>
-            </div>
+    <div class="inst-labels">
+        <div class="inst-label"> </div>
+        <div class="inst-label">KICK <button class="dice-button">🎲</button></div>
+        <div class="inst-label">SNARE <button class="dice-button">🎲</button></div>
+        <div class="inst-label">HIHAT <button class="dice-button">🎲</button></div>
+        <div class="inst-label">TOM <button class="dice-button">🎲</button></div>
+        <div class="inst-label">CLAP <button class="dice-button">🎲</button></div>
+        <div class="inst-label">RIM <button class="dice-button">🎲</button></div>
+        <div class="inst-label">COWBELL <button class="dice-button">🎲</button></div>
+        <div class="inst-label">RIDE <button class="dice-button">🎲</button></div>
+    </div>
+
 
             <div class="sequencer-container">
-                <div class="step-numbers">
-                    <div class="step-number">1</div>
-                    <div class="step-number">2</div>
-                    <div class="step-number">3</div>
-                    <div class="step-number">4</div>
-                    <div class="step-number">5</div>
-                    <div class="step-number">6</div>
-                    <div class="step-number">7</div>
-                    <div class="step-number">8</div>
-                    <div class="step-number">9</div>
-                    <div class="step-number">10</div>
-                    <div class="step-number">11</div>
-                    <div class="step-number">12</div>
-                    <div class="step-number">13</div>
-                    <div class="step-number">14</div>
-                    <div class="step-number">15</div>
-                    <div class="step-number">16</div>
-                </div>
+        <div class="step-numbers">
+            <div class="step-number">1</div>
+            <div class="step-number">2</div>
+            <div class="step-number">3</div>
+            <div class="step-number">4</div>
+            <div class="step-number">5</div>
+            <div class="step-number">6</div>
+            <div class="step-number">7</div>
+            <div class="step-number">8</div>
+            <div class="step-number">9</div>
+            <div class="step-number">10</div>
+            <div class="step-number">11</div>
+            <div class="step-number">12</div>
+            <div class="step-number">13</div>
+            <div class="step-number">14</div>
+            <div class="step-number">15</div>
+            <div class="step-number">16</div>
+        </div>
 
                 <!-- Each row is data-sound=[sampleName], with 16 steps -->
                 <div class="sequencer-row" data-sound="kick">
@@ -484,223 +327,6 @@
         </div>
     </div>
 
-    <script>
-        // Create AudioContext
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        // We'll store decoded AudioBuffers here
-        const audioBuffers = {};
-
-        // All sample file paths
-        const sampleFiles = {
-            kick:    'kick.wav',
-            snare:   'snare.wav',
-            hihat:   'hihat.wav',
-            tom:     'tom.wav',
-            clap:    'clap.wav',
-            rim:     'rim.wav',
-            cowbell: 'cowbell.wav',
-            ride:    'ride.wav'
-        };
-
-        // Simple object to track volume & pitch for each instrument
-        const sampleSettings = {};
-        for (let key in sampleFiles) {
-            sampleSettings[key] = { volume: 1, pitch: 1 };
-        }
-
-        // Load all samples into audioBuffers
-        async function loadSamples() {
-            const promises = Object.keys(sampleFiles).map(async (key) => {
-                const response = await fetch(sampleFiles[key]);
-                const arrayBuf = await response.arrayBuffer();
-                audioBuffers[key] = await audioContext.decodeAudioData(arrayBuf);
-            });
-            // Wait until all are loaded
-            await Promise.all(promises);
-        }
-
-        // Scheduling variables
-        let isPlaying = false;
-        let currentStep = 0;
-        let nextNoteTime = 0;
-        let timerID = null;
-        let tempo = 90;
-
-        // For look-ahead scheduling
-        const scheduleAheadTime = 0.1; // how many seconds ahead to schedule
-        const lookahead = 25;         // ms (how often to run scheduler)
-
-        // DOM elements
-        const drumPads = document.querySelectorAll('.drum-pad');
-        const sequencerSteps = document.querySelectorAll('.sequencer-step');
-        const startButton = document.getElementById('start');
-        const stopButton = document.getElementById('stop');
-        const tempoInput = document.getElementById('tempo');
-        const tempoValue = document.getElementById('tempoValue');
-
-        // Load everything, then enable the UI
-        loadSamples().then(() => {
-            console.log('All samples loaded!');
-        }).catch(err => {
-            console.error('Error loading samples:', err);
-        });
-
-        // Scheduler: schedule as many notes as we can within scheduleAheadTime
-        function scheduler() {
-            while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
-                scheduleStep(currentStep, nextNoteTime);
-                updateStepVisualization(currentStep);
-
-                // Each step is a 16th note
-                const secondsPerBeat = 60.0 / tempo; 
-                nextNoteTime += (secondsPerBeat / 4.0); 
-                currentStep = (currentStep + 1) % 16;
-            }
-            timerID = setTimeout(scheduler, lookahead);
-        }
-
-        // Schedule each active step at the given time
-        function scheduleStep(stepIndex, time) {
-            // For each row's step matching stepIndex, if it's active, schedule a note
-            sequencerSteps.forEach(step => {
-                if (
-                    parseInt(step.dataset.step) === stepIndex &&
-                    step.classList.contains('active')
-                ) {
-                    const sound = step.parentElement.dataset.sound;
-                    scheduleSound(sound, time);
-                }
-            });
-        }
-
-        // Actually schedule a sound in the future using an AudioBufferSourceNode
-        function scheduleSound(sound, time) {
-            const source = audioContext.createBufferSource();
-            source.buffer = audioBuffers[sound];
-            source.playbackRate.value = sampleSettings[sound].pitch;
-
-            const gainNode = audioContext.createGain();
-            gainNode.gain.value = sampleSettings[sound].volume;
-
-            source.connect(gainNode).connect(audioContext.destination);
-            source.start(time);
-        }
-
-        // Update the "current" step visualization
-        function updateStepVisualization(step) {
-            document.querySelectorAll('.sequencer-step, .step-number')
-                .forEach(el => el.classList.remove('current'));
-
-            // highlight all DOM elements that match the data-step
-            document.querySelectorAll(`[data-step="${step}"]`)
-                .forEach(el => el.classList.add('current'));
-
-            // highlight the top row step number
-            const stepNumber = document.querySelector(`.step-number:nth-child(${step + 1})`);
-            if (stepNumber) stepNumber.classList.add('current');
-        }
-
-        // Trigger a sound immediately (for pad preview)
-        function triggerSound(sound) {
-            const source = audioContext.createBufferSource();
-            source.buffer = audioBuffers[sound];
-            source.playbackRate.value = sampleSettings[sound].pitch;
-
-            const gainNode = audioContext.createGain();
-            gainNode.gain.value = sampleSettings[sound].volume;
-
-            source.connect(gainNode).connect(audioContext.destination);
-            source.start(audioContext.currentTime);
-        }
-
-        // Event listeners
-        drumPads.forEach(pad => {
-            const sound = pad.dataset.sound;
-            const volumeKnob = pad.querySelector('.volume-knob');
-            const pitchKnob = pad.querySelector('.pitch-knob');
-
-            // Clicking the pad triggers a one-shot preview of that sound
-            pad.addEventListener('click', () => {
-                triggerSound(sound);
-                // Quick visual feedback
-                pad.classList.add('active');
-                setTimeout(() => pad.classList.remove('active'), 100);
-            });
-
-            // Volume knob
-            volumeKnob.addEventListener('input', () => {
-                sampleSettings[sound].volume = volumeKnob.value;
-            });
-
-            // Pitch knob
-            pitchKnob.addEventListener('input', () => {
-                sampleSettings[sound].pitch = pitchKnob.value;
-            });
-        });
-
-        // Toggle steps on sequencer click
-        sequencerSteps.forEach(step => {
-            step.addEventListener('click', () => step.classList.toggle('active'));
-        });
-
-        // Mobile fix: resume audio context on first touch
-        document.addEventListener('click', () => {
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-        }, { once: true });
-
-        // Start / Stop
-        startButton.addEventListener('click', startSequencer);
-        stopButton.addEventListener('click', stopSequencer);
-
-        // Reset & Random
-        document.getElementById('reset').addEventListener('click', () => {
-            sequencerSteps.forEach(step => step.classList.remove('active'));
-        });
-        document.getElementById('randomize').addEventListener('click', () => {
-            sequencerSteps.forEach(step => {
-                step.classList.toggle('active', Math.random() > 0.8);
-            });
-        });
-
-        // Tempo input
-        tempoInput.addEventListener('input', () => {
-            tempo = parseInt(tempoInput.value, 10);
-            tempoValue.textContent = `${tempo} BPM`;
-
-            // If currently playing, restart scheduler
-            if (isPlaying) {
-                stopSequencer();
-                startSequencer();
-            }
-        });
-
-        // Optional spacebar toggle
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                isPlaying ? stopSequencer() : startSequencer();
-            }
-        });
-
-        function startSequencer() {
-            if (!isPlaying) {
-                isPlaying = true;
-                currentStep = 0;
-                nextNoteTime = audioContext.currentTime;
-                scheduler();
-            }
-        }
-
-        function stopSequencer() {
-            isPlaying = false;
-            clearTimeout(timerID);
-            currentStep = 0;
-            // Clear "current" highlight
-            updateStepVisualization(-1);
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

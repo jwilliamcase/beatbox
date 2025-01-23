@@ -1,0 +1,189 @@
+body { 
+    background-color: #000; 
+    color: #ffa500; 
+    font-family: monospace; 
+    margin: 0; 
+    padding: 20px; 
+    display: flex; 
+    justify-content: center; 
+    min-height: 100vh; 
+}
+.container { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 30px; 
+    max-width: 1000px; 
+    width: 100%; 
+}
+.drum-pads { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 15px; 
+    width: 100%; 
+}
+.drum-pad { 
+    display: flex; 
+    align-items: center; 
+    border: 2px solid #ffa500; 
+    border-radius: 8px; 
+    padding: 12px; 
+    background: #111; 
+    cursor: pointer; 
+    transition: transform 0.1s; 
+}
+.drum-pad:active { 
+    transform: scale(0.95); 
+}
+.pad-controls-left { 
+    display: flex; 
+    gap: 8px; 
+    margin-right: 12px; 
+}
+.knob-container { 
+    position: relative; 
+    width: 50px; 
+    height: 70px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+}
+.knob-label { 
+    font-size: 0.7em; 
+    color: #ffa500; 
+    margin-top: 4px; 
+    text-align: center; 
+}
+input[type="range"].vertical { 
+    -webkit-appearance: slider-vertical;
+    -moz-appearance: slider-vertical;
+    appearance: slider-vertical;
+    width: 30px; 
+    height: 50px; 
+    background: transparent; 
+    cursor: pointer; 
+}
+/* Ensure the sequencer rows are properly aligned */
+.sequencer-container-wrapper {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Labels on the left, sequencer on the right */
+    gap: 10px; /* Add some spacing between labels and sequencer */
+    width: 78%;
+    overflow-x: auto;
+}
+/* Ensure the inst-labels and sequencer rows are properly aligned */
+.inst-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-right: 15px;
+    padding-top: 4px;
+    align-items: flex-end; /* Align labels to the right */
+}
+.inst-label {
+    display: flex;
+    align-items: center; /* Align text and button vertically */
+    justify-content: flex-end; /* Align text to the right */
+    height: 32px;
+    font-size: 0.9em;
+    width: 100%; /* Ensure full width */
+}
+
+.sequencer-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.step-numbers {
+    display: grid;
+    grid-template-columns: repeat(16, 32px);
+    gap: 4px;
+    margin-bottom: 10px;
+}
+.step-number {
+    text-align: center;
+    line-height: 30px;
+}
+.sequencer-row {
+    display: grid;
+    grid-template-columns: repeat(16, 32px); /* 16 steps */
+    gap: 4px;
+    align-items: center; /* Align steps vertically */
+}
+.sequencer-step {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ffa500;
+    border-radius: 3px;
+    background: #111;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+.sequencer-step.active {
+    background: #ff8c00;
+}
+
+.sequencer-step.current {
+    box-shadow: 0 0 10px #ffa500;
+    transform: scale(1.1);
+}
+.step-number.current {
+    color: #ff4500;
+    font-weight: bold;
+}
+/* Strong beat styling */
+.sequencer-step.strong-beat {
+    background-color: #333;
+    border-color: #ff8c00;
+}
+.sequencer-step.strong-beat.active {
+    background-color: #cc6600;
+}
+.controls { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+    justify-content: center; 
+    width: 100%; 
+    padding: 10px; 
+}
+
+.dice-button {
+    background: none;
+    border: none;
+    color: #ffa500;
+    font-size: 1.2em;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.1s;
+    margin-left: 10px; /* Add spacing between text and button */
+}
+
+.dice-button:hover {
+    transform: scale(1.1);
+}
+
+.dice-button:active {
+    transform: scale(0.9);
+    transform: rotate(90deg) scale(0.9);
+}
+
+button { 
+    background: #ffa500; 
+    color: #000; 
+    border: none; 
+    padding: 8px 16px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    transition: opacity 0.2s; 
+}
+button:active { 
+    opacity: 0.8; 
+}
+@media (max-width: 768px) { 
+    .drum-pads { grid-template-columns: repeat(2, 1fr); } 
+    .drum-pad { padding: 8px; } 
+    .knob-container { width: 40px; } 
+    .sequencer-container-wrapper { transform: scale(0.95); } 
+}
