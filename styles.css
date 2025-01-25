@@ -26,6 +26,7 @@ body {
 .drum-pad {
     display: flex;
     align-items: center;
+    justify-content: center; /* center the content */
     border: 2px solid #ffa500;
     border-radius: 8px;
     padding: 8px;
@@ -33,6 +34,9 @@ body {
     cursor: pointer;
     transition: transform 0.1s;
     font-size: 1.5em;
+    width: 120px;     /* fixed width */
+    min-height: 80px; /* ensure consistent height */
+    box-sizing: border-box;
 }
 .drum-pad:active { 
     transform: scale(0.95); 
@@ -88,9 +92,13 @@ input[type="range"].vertical {
     align-items: center;
     justify-content: flex-end;
     height: 37px;
-    font-size: 1.5em;
+    font-size: 1.2em; /* reduced slightly */
     width: 100%;
+    max-width: 250px; /* optional, to prevent overflow */
     margin-bottom: 5px;
+    text-overflow: ellipsis; /* if text is too long, ellipsize */
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .sequencer-container {

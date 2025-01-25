@@ -214,11 +214,20 @@ tempoDisplay.addEventListener('mousedown', (e) => {
     startY = e.clientY;
     startTempo = tempo;
     document.body.style.userSelect = 'none';
+    e.preventDefault();
+});
+
+// Also add touch-based dragging
+tempoDisplay.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    startY = e.touches[0].clientY;
+    startTempo = tempo;
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
 });
 
 document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    
     const deltaY = startY - e.clientY;
     const newTempo = Math.min(240, Math.max(60, startTempo + deltaY));
     
@@ -234,7 +243,30 @@ document.addEventListener('mousemove', (e) => {
     }
 });
 
+document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const deltaY = startY - e.touches[0].clientY;
+    const newTempo = Math.min(240, Math.max(60, startTempo + deltaY));
+    
+    if (newTempo !== tempo) {
+        tempo = newTempo;
+        tempoDisplay.textContent = tempo;
+        document.getElementById('tempo').value = tempo;
+
+        if (isPlaying) {
+            stopSequencer();
+            startSequencer();
+        }
+    }
+    e.preventDefault();
+});
+
 document.addEventListener('mouseup', () => {
+    isDragging = false;
+    document.body.style.userSelect = '';
+});
+
+document.addEventListener('touchend', () => {
     isDragging = false;
     document.body.style.userSelect = '';
 });
