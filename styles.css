@@ -219,8 +219,55 @@ button:active {
     transform: scale(0.95);
 }
 @media (max-width: 768px) { 
-    .drum-pads { grid-template-columns: repeat(2, 1fr); } 
-    .drum-pad { padding: 8px; } 
-    .knob-container { width: 40px; } 
-    .sequencer-container-wrapper { transform: scale(0.95); } 
+    /* Stack everything in one column; pads on top, sequencer in middle, controls at bottom */
+    .container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Make pads have 2 columns or 1 column if screen is extremely narrow */
+    .drum-pads {
+        grid-template-columns: repeat(2, 1fr);
+        justify-items: center;
+    }
+
+    /* Slightly larger pad for comfortable tapping */
+    .drum-pad {
+        padding: 12px;
+        font-size: 1.6em;
+    }
+    .pad-controls-left {
+        margin-right: 8px;
+    }
+
+    /* Larger knob for comfortable tapping */
+    .knob-container {
+        width: 50px;
+        height: 80px;
+    }
+    .knob-label {
+        font-size: 0.8em;
+    }
+
+    /* Steps also a bit bigger for easy tapping */
+    .sequencer-step {
+        width: 40px;
+        height: 40px;
+    }
+    /* Possibly remove scale transform if it's causing layout issues */
+    .sequencer-container-wrapper {
+        transform: none;
+        margin-top: 10px;
+    }
+
+    /* Place controls at the bottom, center them */
+    .controls {
+        order: 3;
+        margin-top: 10px;
+    }
+
+    /* Optional: add some spacing so big phone screens still look good */
+    body {
+        padding: 10px;
+    }
 }

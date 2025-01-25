@@ -182,6 +182,13 @@ document.addEventListener('click', () => {
     }
 }, { once: true });
 
+// Also listen for first "touchstart" to resume audio context on iOS
+document.addEventListener('touchstart', () => {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}, { once: true });
+
 // Start / Stop
 startButton.addEventListener('click', startSequencer);
 stopButton.addEventListener('click', stopSequencer);
