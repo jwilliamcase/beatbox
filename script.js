@@ -196,16 +196,40 @@ document.getElementById('randomize').addEventListener('click', () => {
     });
 });
 
-// Tempo input
-tempoInput.addEventListener('input', () => {
-    tempo = parseInt(tempoInput.value, 10);
-    tempoValue.textContent = `${tempo} BPM`;
+// Tempo drag handlers
+let isDragging = false;
+let startY = 0;
+let startTempo = 0;
+const tempoDisplay = document.getElementById('tempoDisplay');
 
-    // If currently playing, restart scheduler
-    if (isPlaying) {
-        stopSequencer();
-        startSequencer();
+tempoDisplay.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startY = e.clientY;
+    startTempo = tempo;
+    document.body.style.userSelect = 'none';
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    
+    const deltaY = startY - e.clientY;
+    const newTempo = Math.min(240, Math.max(60, startTempo + deltaY));
+    
+    if (newTempo !== tempo) {
+        tempo = newTempo;
+        tempoDisplay.textContent = tempo;
+        document.getElementById('tempo').value = tempo;
+
+        if (isPlaying) {
+            stopSequencer();
+            startSequencer();
+        }
     }
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    document.body.style.userSelect = '';
 });
 
 // Optional spacebar toggle
