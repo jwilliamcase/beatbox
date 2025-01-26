@@ -1,68 +1,92 @@
+/* Global styles */
+* {
+    box-sizing: border-box;
+}
 body { 
     background-color: #000; 
     color: #ffa500; 
     font-family: 'Rajdhani', sans-serif;
     margin: 0; 
-    padding: 0; /* remove top-level padding to avoid offset from notch */
-    display: flex; 
-    justify-content: center; 
-    min-height: 100vh; 
-
-    /* For iOS Notch: ensure content extends beneath the notch area */
+    padding: 0;
+    /* For iOS Notch: content extends to safe area */
     padding-top: env(safe-area-inset-top);
     padding-right: env(safe-area-inset-right);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
-    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
 }
 .container { 
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    width: 100%; 
     max-width: 1200px;
-    width: 100%; 
     margin: 0 auto;
+    padding: 8px;
+    gap: 20px;
 }
+
+/* Drum pads container */
 .drum-pads { 
-    display: grid; 
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
     width: 100%; 
+    margin-bottom: 10px;
+}
+.pad-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #111;
+    border-radius: 8px;
+    padding: 12px;
+    min-width: 160px;
+    max-width: 220px;
+    flex: 1 1 auto;
 }
 .drum-pad {
+    width: 80px;
+    height: 80px;
+    background-color: #333;
+    border: 2px solid #ffaa00;
+    border-radius: 8px;
+    position: relative;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #ffa500;
-    border-radius: 8px;
-    padding: 8px;
-    background: #111;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
     cursor: pointer;
-    transition: transform 0.1s;
-    font-size: 1.5em;
-    width: 100px;     /* narrower for small screens */
-    min-height: 80px;
-    box-sizing: border-box;
 }
-.drum-pad:active { 
-    transform: scale(0.95); 
+.drum-pad.active {
+    box-shadow: 0 0 20px #ffaa00;
+    transform: scale(1.05);
 }
-.pad-controls-left { 
+.pad-label {
+    position: absolute;
+    bottom: -1.5em;
+    text-align: center;
+    font-size: 1.1em;
+    color: #ffa500;
+}
+
+/* Controls for volume & pitch */
+.pad-controls {
     display: flex; 
+    flex-direction: row;
     gap: 8px; 
-    margin-right: 12px; 
 }
 .knob-container { 
-    position: relative; 
-    width: 50px; 
-    height: 70px; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
+    width: 50px;
 }
 .knob-label { 
-    font-size: 0.7em; 
+    font-size: 0.8em;
     color: #ffa500; 
     margin-top: 4px; 
     text-align: center; 
@@ -72,48 +96,89 @@ input[type="range"].vertical {
     -moz-appearance: slider-vertical;
     appearance: slider-vertical;
     width: 20px;
-    height: 40px;
+    height: 60px;
     background: transparent; 
     cursor: pointer; 
 }
-/* Ensure the sequencer rows are properly aligned */
+
+/* Custom thumb color on WebKit (Chrome/Safari) */
+input[type="range"].vertical::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #ffa500;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #333; /* small border to blend with the track */
+}
+input[type="range"].vertical::-webkit-slider-thumb:active {
+    background: #ffcc66;
+}
+
+/* For Firefox */
+input[type="range"].vertical::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #ffa500;
+    border-radius: 50%;
+    border: 2px solid #333;
+    cursor: pointer;
+}
+input[type="range"].vertical::-moz-range-thumb:active {
+    background: #ffcc66;
+}
+
+/* Sequencer */
 .sequencer-container-wrapper {
     display: flex;
-    align-items: center;
-    align-content: center;
     width: 100%;
     flex-wrap: wrap;
     justify-content: center;
+    gap: 10px;
 }
-
-/* Ensure the inst-labels and sequencer rows are properly aligned */
 .inst-labels {
     display: flex;
     flex-direction: column;
     gap: 0;
-    padding: 0;
-    align-items: center; /* center or flex-end as you prefer */
+    align-items: center;
+    text-align: center;
 }
 .inst-label {
     display: flex;
     align-items: center;
-    justify-content: center; /* center or flex-end as needed */
-    height: auto;
+    justify-content: space-between;
+    font-size: 1.2em;
+    width: 180px;
+    height: 35px;
+    margin-bottom: 6px;
+    padding: 0 8px;
+    color: #ffa500;
+    font-weight: 600;
+    box-sizing: border-box;
+}
+.dice-button {
+    background: none;
+    border: none;
+    color: #ffa500;
     font-size: 1.1em;
-    width: 100%;
-    max-width: 240px;
-    margin-bottom: 5px;
-    word-wrap: break-word;     /* allow wrap */
-    white-space: normal;       /* let text flow to next line if needed */
-    text-align: center;
+    cursor: pointer;
+    padding: 0 2px;
+    transition: transform 0.1s;
+    margin-left: 4px;
+}
+.dice-button:hover {
+    transform: scale(1.1);
+}
+.dice-button:active {
+    transform: rotate(90deg) scale(0.9);
 }
 
+/* Sequencer grid */
 .sequencer-container {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
-
 .step-numbers {
     display: grid;
     grid-template-columns: repeat(16, 35px);
@@ -123,12 +188,13 @@ input[type="range"].vertical {
 .step-number {
     text-align: center;
     line-height: 30px;
+    color: #ffa500;
 }
 .sequencer-row {
     display: grid;
-    grid-template-columns: repeat(16, 35px); /* 16 steps */
+    grid-template-columns: repeat(16, 35px);
     gap: 2px;
-    align-items: center; /* Align steps vertically */
+    align-items: center;
 }
 .sequencer-step {
     width: 35px;
@@ -137,28 +203,36 @@ input[type="range"].vertical {
     border-radius: 3px;
     background: #111;
     cursor: pointer;
-    transition: all 0.1s;
+    transition: background-color 0.1s, transform 0.1s;
 }
 .sequencer-step.active {
-    background: #ff8c00;
+    background-color: #ff8c00;
 }
-
-.sequencer-step.current {
-    box-shadow: 0 0 10px #ffa500;
-    transform: scale(1.1);
-}
-.step-number.current {
-    color: #ff4500;
-    font-weight: bold;
-}
-/* Strong beat styling */
 .sequencer-step.strong-beat {
-    background-color: #333;
+    background-color: #222;
     border-color: #ff8c00;
 }
 .sequencer-step.strong-beat.active {
     background-color: #cc6600;
 }
+
+/* Chasing animation for current step */
+@keyframes chasing {
+    0%   { box-shadow: 0 0 0px #ff8c00; }
+    50%  { box-shadow: 0 0 15px #ff8c00; }
+    100% { box-shadow: 0 0 0px #ff8c00; }
+}
+.sequencer-step.current {
+    animation: chasing 0.4s ease-in-out;
+}
+
+/* Step number highlight */
+.step-number.current {
+    color: #ff4500;
+    font-weight: bold;
+}
+
+/* Controls */
 .controls { 
     display: flex; 
     flex-wrap: wrap; 
@@ -167,27 +241,6 @@ input[type="range"].vertical {
     width: 100%; 
     padding: 10px; 
 }
-
-.dice-button {
-    background: none;
-    border: none;
-    color: #ffa500;
-    font-size: 1.2em;
-    cursor: pointer;
-    padding: 0;
-    transition: transform 0.1s;
-    margin-left: 2px; /* Even tighter spacing */
-}
-
-.dice-button:hover {
-    transform: scale(1.1);
-}
-
-.dice-button:active {
-    transform: scale(0.9);
-    transform: rotate(90deg) scale(0.9);
-}
-
 button { 
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
@@ -202,15 +255,9 @@ button {
     min-width: 100px;
     line-height: 1.2;
 }
-
-button > * {
-    vertical-align: middle;
-    font-size: 1.4em;
-}
 button:active { 
     opacity: 0.8; 
 }
-
 .tempo-display {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
@@ -225,64 +272,45 @@ button:active {
     min-width: 120px;
     text-align: center;
 }
-
 .tempo-display:hover {
     transform: scale(1.05);
 }
-
 .tempo-display:active {
     transform: scale(0.95);
 }
+
+/* Responsive */
 @media (max-width: 768px) { 
     .container {
-        flex-direction: column;
         gap: 10px;
     }
-
-    .drum-pads {
-        grid-template-columns: repeat(2, 1fr);
-        justify-items: center;
+    .pad-group {
+        flex-direction: row;
+        justify-content: space-between;
+        max-width: 100%;
     }
-
-    /* Slightly larger pad for comfortable tapping,
-       but narrower in dimension so they fit side by side */
     .drum-pad {
-        width: 100px;
-        padding: 12px;
-        font-size: 1.4em;
-    }
-    .pad-controls-left {
+        width: 72px;
+        height: 72px;
+        margin-bottom: 0;
         margin-right: 8px;
     }
-
-    .knob-container {
-        width: 50px;
-        height: 80px;
-    }
-    .knob-label {
+    .pad-label {
+        bottom: -1.2em;
         font-size: 0.8em;
     }
-
-    .sequencer-step {
+    .knob-container {
         width: 40px;
-        height: 40px;
     }
-    .sequencer-container-wrapper {
-        transform: none;
-        margin-top: 10px;
+    input[type="range"].vertical {
+        height: 50px;
     }
-
-    .controls {
-        order: 3;
-        margin-top: 10px;
+    .sequencer-step {
+        width: 30px;
+        height: 30px;
     }
-
-    body {
-        padding: 10px;
-        /* Also include safe area insets on mobile for iPhone notch */
-        padding-top: calc(10px + env(safe-area-inset-top));
-        padding-bottom: calc(10px + env(safe-area-inset-bottom));
-        padding-left: calc(10px + env(safe-area-inset-left));
-        padding-right: calc(10px + env(safe-area-inset-right));
+    .step-numbers,
+    .sequencer-row {
+        grid-template-columns: repeat(16, 30px);
     }
 }

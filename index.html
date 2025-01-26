@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Drum Machine - Web Audio API</title>
+    <title>B34tB0X</title>
     <meta charset="utf-8">
-    <!-- Adjusted viewport meta tag for iOS, disabling user scaling -->
+    <!-- Adjusted viewport for mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-
-    <!-- Optional: allow standalone app usage when added to home screen on iOS -->
+    <!-- Optional: allow standalone usage on iOS home screen -->
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
@@ -17,8 +16,11 @@
         <!-- DRUM PADS -->
         <div class="drum-pads">
             <!-- Kick -->
-            <div class="drum-pad" data-sound="kick">
-                <div class="pad-controls-left">
+            <div class="pad-group" data-sound="kick">
+                <div class="drum-pad">
+                    <div class="pad-label">Kick</div>
+                </div>
+                <div class="pad-controls">
                     <div class="knob-container">
                         <input type="range" class="vertical volume-knob" min="0" max="1" step="0.01" value="1">
                         <div class="knob-label">VOL</div>
@@ -28,12 +30,14 @@
                         <div class="knob-label">PITCH</div>
                     </div>
                 </div>
-                <div class="pad-label">Kick</div>
             </div>
 
             <!-- Snare -->
-            <div class="drum-pad" data-sound="snare">
-                <div class="pad-controls-left">
+            <div class="pad-group" data-sound="snare">
+                <div class="drum-pad">
+                    <div class="pad-label">Snare</div>
+                </div>
+                <div class="pad-controls">
                     <div class="knob-container">
                         <input type="range" class="vertical volume-knob" min="0" max="1" step="0.01" value="1">
                         <div class="knob-label">VOL</div>
@@ -43,12 +47,14 @@
                         <div class="knob-label">PITCH</div>
                     </div>
                 </div>
-                <div class="pad-label">Snare</div>
             </div>
 
             <!-- Hi-Hat -->
-            <div class="drum-pad" data-sound="hihat">
-                <div class="pad-controls-left">
+            <div class="pad-group" data-sound="hihat">
+                <div class="drum-pad">
+                    <div class="pad-label">Hi-Hat</div>
+                </div>
+                <div class="pad-controls">
                     <div class="knob-container">
                         <input type="range" class="vertical volume-knob" min="0" max="1" step="0.01" value="1">
                         <div class="knob-label">VOL</div>
@@ -58,12 +64,14 @@
                         <div class="knob-label">PITCH</div>
                     </div>
                 </div>
-                <div class="pad-label">Hi-Hat</div>
             </div>
 
             <!-- Tom -->
-            <div class="drum-pad" data-sound="tom">
-                <div class="pad-controls-left">
+            <div class="pad-group" data-sound="tom">
+                <div class="drum-pad">
+                    <div class="pad-label">Tom</div>
+                </div>
+                <div class="pad-controls">
                     <div class="knob-container">
                         <input type="range" class="vertical volume-knob" min="0" max="1" step="0.01" value="1">
                         <div class="knob-label">VOL</div>
@@ -73,12 +81,14 @@
                         <div class="knob-label">PITCH</div>
                     </div>
                 </div>
-                <div class="pad-label">Tom</div>
             </div>
 
             <!-- Clap -->
-            <div class="drum-pad" data-sound="clap">
-                <div class="pad-controls-left">
+            <div class="pad-group" data-sound="clap">
+                <div class="drum-pad">
+                    <div class="pad-label">Clap</div>
+                </div>
+                <div class="pad-controls">
                     <div class="knob-container">
                         <input type="range" class="vertical volume-knob" min="0" max="1" step="0.01" value="1">
                         <div class="knob-label">VOL</div>
@@ -88,12 +98,14 @@
                         <div class="knob-label">PITCH</div>
                     </div>
                 </div>
-                <div class="pad-label">Clap</div>
             </div>
 
             <!-- Rim -->
-            <div class="drum-pad" data-sound="rim">
-                <div class="pad-controls-left">
+            <div class="pad-group" data-sound="rim">
+                <div class="drum-pad">
+                    <div class="pad-label">Rim</div>
+                </div>
+                <div class="pad-controls">
                     <div class="knob-container">
                         <input type="range" class="vertical volume-knob" min="0" max="1" step="0.01" value="1">
                         <div class="knob-label">VOL</div>
@@ -103,12 +115,14 @@
                         <div class="knob-label">PITCH</div>
                     </div>
                 </div>
-                <div class="pad-label">Rim</div>
             </div>
 
             <!-- Cowbell -->
-            <div class="drum-pad" data-sound="cowbell">
-                <div class="pad-controls-left">
+            <div class="pad-group" data-sound="cowbell">
+                <div class="drum-pad">
+                    <div class="pad-label">Cowbell</div>
+                </div>
+                <div class="pad-controls">
                     <div class="knob-container">
                         <input type="range" class="vertical volume-knob" min="0" max="1" step="0.01" value="1">
                         <div class="knob-label">VOL</div>
@@ -118,12 +132,14 @@
                         <div class="knob-label">PITCH</div>
                     </div>
                 </div>
-                <div class="pad-label">Cowbell</div>
             </div>
 
             <!-- Ride -->
-            <div class="drum-pad" data-sound="ride">
-                <div class="pad-controls-left">
+            <div class="pad-group" data-sound="ride">
+                <div class="drum-pad">
+                    <div class="pad-label">Ride</div>
+                </div>
+                <div class="pad-controls">
                     <div class="knob-container">
                         <input type="range" class="vertical volume-knob" min="0" max="1" step="0.01" value="1">
                         <div class="knob-label">VOL</div>
@@ -133,46 +149,44 @@
                         <div class="knob-label">PITCH</div>
                     </div>
                 </div>
-                <div class="pad-label">Ride</div>
             </div>
         </div>
 
         <!-- SEQUENCER -->
         <div class="sequencer-container-wrapper">
-    <div class="inst-labels">
-        <div class="inst-label"> </div>
-        <div class="inst-label">KICK <button class="dice-button">🎲</button></div>
-        <div class="inst-label">SNARE <button class="dice-button">🎲</button></div>
-        <div class="inst-label">HIHAT <button class="dice-button">🎲</button></div>
-        <div class="inst-label">TOM <button class="dice-button">🎲</button></div>
-        <div class="inst-label">CLAP <button class="dice-button">🎲</button></div>
-        <div class="inst-label">RIM <button class="dice-button">🎲</button></div>
-        <div class="inst-label">COWBELL <button class="dice-button">🎲</button></div>
-        <div class="inst-label">RIDE <button class="dice-button">🎲</button></div>
-    </div>
-
+            <div class="inst-labels">
+                <div class="inst-label"></div>
+                <div class="inst-label">KICK <button class="dice-button">🎲</button></div>
+                <div class="inst-label">SNARE <button class="dice-button">🎲</button></div>
+                <div class="inst-label">HIHAT <button class="dice-button">🎲</button></div>
+                <div class="inst-label">TOM <button class="dice-button">🎲</button></div>
+                <div class="inst-label">CLAP <button class="dice-button">🎲</button></div>
+                <div class="inst-label">RIM <button class="dice-button">🎲</button></div>
+                <div class="inst-label">COWBELL <button class="dice-button">🎲</button></div>
+                <div class="inst-label">RIDE <button class="dice-button">🎲</button></div>
+            </div>
 
             <div class="sequencer-container">
-        <div class="step-numbers">
-            <div class="step-number">1</div>
-            <div class="step-number">2</div>
-            <div class="step-number">3</div>
-            <div class="step-number">4</div>
-            <div class="step-number">5</div>
-            <div class="step-number">6</div>
-            <div class="step-number">7</div>
-            <div class="step-number">8</div>
-            <div class="step-number">9</div>
-            <div class="step-number">10</div>
-            <div class="step-number">11</div>
-            <div class="step-number">12</div>
-            <div class="step-number">13</div>
-            <div class="step-number">14</div>
-            <div class="step-number">15</div>
-            <div class="step-number">16</div>
-        </div>
+                <div class="step-numbers">
+                    <div class="step-number">1</div>
+                    <div class="step-number">2</div>
+                    <div class="step-number">3</div>
+                    <div class="step-number">4</div>
+                    <div class="step-number">5</div>
+                    <div class="step-number">6</div>
+                    <div class="step-number">7</div>
+                    <div class="step-number">8</div>
+                    <div class="step-number">9</div>
+                    <div class="step-number">10</div>
+                    <div class="step-number">11</div>
+                    <div class="step-number">12</div>
+                    <div class="step-number">13</div>
+                    <div class="step-number">14</div>
+                    <div class="step-number">15</div>
+                    <div class="step-number">16</div>
+                </div>
 
-                <!-- Each row is data-sound=[sampleName], with 16 steps -->
+                <!-- Each row: data-sound=sampleName, 16 steps -->
                 <div class="sequencer-row" data-sound="kick">
                     <div class="sequencer-step strong-beat" data-step="0"></div>
                     <div class="sequencer-step" data-step="1"></div>
@@ -332,7 +346,7 @@
             <button id="randomize">🎲 Random</button>
         </div>
     </div>
-
+    
     <script src="script.js"></script>
 </body>
 </html>

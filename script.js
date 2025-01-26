@@ -45,7 +45,7 @@ const scheduleAheadTime = 0.1; // how many seconds ahead to schedule
 const lookahead = 25;         // ms (how often to run scheduler)
 
 // DOM elements
-const drumPads = document.querySelectorAll('.drum-pad');
+const padGroups = document.querySelectorAll('.pad-group');
 const sequencerSteps = document.querySelectorAll('.sequencer-step');
 const startButton = document.getElementById('start');
 const stopButton = document.getElementById('stop');
@@ -146,17 +146,18 @@ function triggerSound(sound) {
 }
 
 // Event listeners
-drumPads.forEach(pad => {
-    const sound = pad.dataset.sound;
-    const volumeKnob = pad.querySelector('.volume-knob');
-    const pitchKnob = pad.querySelector('.pitch-knob');
+padGroups.forEach(group => {
+    const sound = group.dataset.sound;
+    const drumPad = group.querySelector('.drum-pad');
+    const volumeKnob = group.querySelector('.volume-knob');
+    const pitchKnob = group.querySelector('.pitch-knob');
 
     // Clicking the pad triggers a one-shot preview of that sound
-    pad.addEventListener('click', () => {
+    drumPad.addEventListener('click', () => {
         triggerSound(sound);
         // Quick visual feedback
-        pad.classList.add('active');
-        setTimeout(() => pad.classList.remove('active'), 100);
+        drumPad.classList.add('active');
+        setTimeout(() => drumPad.classList.remove('active'), 200);
     });
 
     // Volume knob
