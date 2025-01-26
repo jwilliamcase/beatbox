@@ -31,7 +31,7 @@ body {
 /* Drum pads container */
 .drum-pads { 
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 12px;
     width: 100%; 
     margin-bottom: 10px;
@@ -43,8 +43,8 @@ body {
     background-color: #111;
     border-radius: 8px;
     padding: 12px;
-    min-width: 160px;
-    max-width: 220px;
+    min-width: 100px;
+    max-width: 200px;
     flex: 1 1 auto;
 }
 .drum-pad {
@@ -203,10 +203,14 @@ input[type="range"].vertical::-moz-range-thumb:active {
     border-radius: 3px;
     background: #111;
     cursor: pointer;
-    transition: background-color 0.1s, transform 0.1s;
-}
 .sequencer-step.active {
-    background-color: #ff8c00;
+    /* We rely on updateStepColor() for final color.
+       Keep a slight outline or box-shadow if desired. */
+    outline: 1px solid #ff8c00;
+}
+    /* We rely on updateStepColor() for final color.
+       Keep a slight outline or box-shadow if desired. */
+    outline: 1px solid #ff8c00;
 }
 .sequencer-step.strong-beat {
     background-color: #222;

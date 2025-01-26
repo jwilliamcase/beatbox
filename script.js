@@ -1,10 +1,10 @@
-// Create AudioContext
+/** Create AudioContext */
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-// We'll store decoded AudioBuffers here
+/** We'll store decoded AudioBuffers here */
 const audioBuffers = {};
 
-// All sample file paths
+/** All sample file paths */
 const sampleFiles = {
     kick:    'kick.wav',
     snare:   'snare.wav',
@@ -16,13 +16,21 @@ const sampleFiles = {
     ride:    'ride.wav'
 };
 
-// Simple object to track volume & pitch for each instrument
+/** Simple object to track volume & pitch for each instrument */
 const sampleSettings = {};
 for (let key in sampleFiles) {
     sampleSettings[key] = { volume: 1, pitch: 1 };
 }
 
-// Load all samples into audioBuffers
+/** A global object to store per-step volumes for each instrument,
+ * 16 steps each, default to 0 (off). 
+ */
+const stepVolumes = {};
+Object.keys(sampleFiles).forEach(instrument => {
+    stepVolumes[instrument] = new Array(16).fill(0);
+});
+
+/** Load all samples into audioBuffers */
 async function loadSamples() {
     const promises = Object.keys(sampleFiles).map(async (key) => {
         const response = await fetch(sampleFiles[key]);
@@ -42,42 +50,66 @@ let tempo = 90;
 
 // For look-ahead scheduling
 const scheduleAheadTime = 0.1; // how many seconds ahead to schedule
-const lookahead = 25;         // ms (how often to run scheduler)
+const lookahead = 25;          // ms (how often to run scheduler)
 
-// DOM elements
+// DOM references
 const padGroups = document.querySelectorAll('.pad-group');
 const sequencerSteps = document.querySelectorAll('.sequencer-step');
 const startButton = document.getElementById('start');
 const stopButton = document.getElementById('stop');
 const tempoInput = document.getElementById('tempo');
 const tempoValue = document.getElementById('tempoValue');
+const tempoDisplay = document.getElementById('tempoDisplay');
 
-// Function to randomize a specific sequencer row
-function randomizeRow(sound) {
-    const steps = document.querySelectorAll(`.sequencer-row[data-sound="${sound}"] .sequencer-step`);
-    steps.forEach(step => {
-        step.classList.toggle('active', Math.random() > 0.8); // 20% chance to activate a step
+// -------------- Functions -------------- //
+
+/** scheduleSound: schedule a sound at a given time with a finalVolume 
+ *  derived from instrument volume * stepVolume 
+ */
+function scheduleSound(sound, time, stepVol = 1) {
+    const source = audioContext.createBufferSource();
+    source.buffer = audioBuffers[sound];
+    source.playbackRate.value = sampleSettings[sound].pitch;
+
+    const gainNode = audioContext.createGain();
+    const finalVolume = sampleSettings[sound].volume * stepVol;
+    gainNode.gain.value = finalVolume;
+
+    source.connect(gainNode).connect(audioContext.destination);
+    source.start(time);
+}
+
+/** scheduleStep: for each step matching stepIndex, 
+ *  if stepVolume > 0, schedule a note 
+ */
+function scheduleStep(stepIndex, time) {
+    sequencerSteps.forEach(step => {
+        if (parseInt(step.dataset.step) === stepIndex) {
+            const sound = step.parentElement.dataset.sound;
+            const vol = stepVolumes[sound][stepIndex];
+            if (vol > 0) {
+                scheduleSound(sound, time, vol);
+            }
+        }
     });
 }
 
-// Add event listeners to all dice buttons
-document.querySelectorAll('.dice-button').forEach((button, index) => {
-    const sounds = ['kick', 'snare', 'hihat', 'tom', 'clap', 'rim', 'cowbell', 'ride'];
-    const sound = sounds[index]; // Match the button index to the sound
-    button.addEventListener('click', (e) => {
-        e.stopPropagation(); // Stop the event from bubbling up
-        randomizeRow(sound);
-    });
-});
+/** updateStepVisualization: highlight the current step in the UI */
+function updateStepVisualization(step) {
+    // remove existing .current classes
+    document.querySelectorAll('.sequencer-step, .step-number')
+        .forEach(el => el.classList.remove('current'));
 
-// Load everything, then enable the UI
-loadSamples().then(() => {
-    console.log('All samples loaded!');
-}).catch(err => {
-    console.error('Error loading samples:', err);
-});
+    // highlight elements matching data-step=step
+    document.querySelectorAll(`[data-step="${step}"]`)
+        .forEach(el => el.classList.add('current'));
 
-// Scheduler: schedule as many notes as we can within scheduleAheadTime
+    // highlight the top row step number
+    const stepNumber = document.querySelector(`.step-number:nth-child(${step + 1})`);
+    if (stepNumber) stepNumber.classList.add('current');
+}
+
+/** scheduler: schedule as many notes as we can within scheduleAheadTime */
 function scheduler() {
     while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
         scheduleStep(currentStep, nextNoteTime);
@@ -91,195 +123,7 @@ function scheduler() {
     timerID = setTimeout(scheduler, lookahead);
 }
 
-// Schedule each active step at the given time
-function scheduleStep(stepIndex, time) {
-    // For each row's step matching stepIndex, if it's active, schedule a note
-    sequencerSteps.forEach(step => {
-        if (
-            parseInt(step.dataset.step) === stepIndex &&
-            step.classList.contains('active')
-        ) {
-            const sound = step.parentElement.dataset.sound;
-            scheduleSound(sound, time);
-        }
-    });
-}
-
-// Actually schedule a sound in the future using an AudioBufferSourceNode
-function scheduleSound(sound, time) {
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffers[sound];
-    source.playbackRate.value = sampleSettings[sound].pitch;
-
-    const gainNode = audioContext.createGain();
-    gainNode.gain.value = sampleSettings[sound].volume;
-
-    source.connect(gainNode).connect(audioContext.destination);
-    source.start(time);
-}
-
-// Update the "current" step visualization
-function updateStepVisualization(step) {
-    document.querySelectorAll('.sequencer-step, .step-number')
-        .forEach(el => el.classList.remove('current'));
-
-    // highlight all DOM elements that match the data-step
-    document.querySelectorAll(`[data-step="${step}"]`)
-        .forEach(el => el.classList.add('current'));
-
-    // highlight the top row step number
-    const stepNumber = document.querySelector(`.step-number:nth-child(${step + 1})`);
-    if (stepNumber) stepNumber.classList.add('current');
-}
-
-// Trigger a sound immediately (for pad preview)
-function triggerSound(sound) {
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffers[sound];
-    source.playbackRate.value = sampleSettings[sound].pitch;
-
-    const gainNode = audioContext.createGain();
-    gainNode.gain.value = sampleSettings[sound].volume;
-
-    source.connect(gainNode).connect(audioContext.destination);
-    source.start(audioContext.currentTime);
-}
-
-// Event listeners
-padGroups.forEach(group => {
-    const sound = group.dataset.sound;
-    const drumPad = group.querySelector('.drum-pad');
-    const volumeKnob = group.querySelector('.volume-knob');
-    const pitchKnob = group.querySelector('.pitch-knob');
-
-    // Clicking the pad triggers a one-shot preview of that sound
-    drumPad.addEventListener('click', () => {
-        triggerSound(sound);
-        // Quick visual feedback
-        drumPad.classList.add('active');
-        setTimeout(() => drumPad.classList.remove('active'), 200);
-    });
-
-    // Volume knob
-    volumeKnob.addEventListener('input', () => {
-        sampleSettings[sound].volume = volumeKnob.value;
-    });
-
-    // Pitch knob
-    pitchKnob.addEventListener('input', () => {
-        sampleSettings[sound].pitch = pitchKnob.value;
-    });
-});
-
-// Toggle steps on sequencer click
-sequencerSteps.forEach(step => {
-    step.addEventListener('click', () => step.classList.toggle('active'));
-});
-
-// Mobile fix: resume audio context on first touch
-document.addEventListener('click', () => {
-    if (audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-}, { once: true });
-
-// Also listen for first "touchstart" to resume audio context on iOS
-document.addEventListener('touchstart', () => {
-    if (audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-}, { once: true });
-
-// Start / Stop
-startButton.addEventListener('click', startSequencer);
-stopButton.addEventListener('click', stopSequencer);
-
-// Reset & Random
-document.getElementById('reset').addEventListener('click', () => {
-    sequencerSteps.forEach(step => step.classList.remove('active'));
-});
-document.getElementById('randomize').addEventListener('click', () => {
-    sequencerSteps.forEach(step => {
-        step.classList.toggle('active', Math.random() > 0.8);
-    });
-});
-
-// Tempo drag handlers
-let isDragging = false;
-let startY = 0;
-let startTempo = 0;
-const tempoDisplay = document.getElementById('tempoDisplay');
-
-tempoDisplay.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    startY = e.clientY;
-    startTempo = tempo;
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
-});
-
-// Also add touch-based dragging
-tempoDisplay.addEventListener('touchstart', (e) => {
-    isDragging = true;
-    startY = e.touches[0].clientY;
-    startTempo = tempo;
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
-});
-
-document.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    const deltaY = startY - e.clientY;
-    const newTempo = Math.min(240, Math.max(60, startTempo + deltaY));
-    
-    if (newTempo !== tempo) {
-        tempo = newTempo;
-        tempoDisplay.textContent = tempo;
-        document.getElementById('tempo').value = tempo;
-
-        if (isPlaying) {
-            stopSequencer();
-            startSequencer();
-        }
-    }
-});
-
-document.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    const deltaY = startY - e.touches[0].clientY;
-    const newTempo = Math.min(240, Math.max(60, startTempo + deltaY));
-    
-    if (newTempo !== tempo) {
-        tempo = newTempo;
-        tempoDisplay.textContent = tempo;
-        document.getElementById('tempo').value = tempo;
-
-        if (isPlaying) {
-            stopSequencer();
-            startSequencer();
-        }
-    }
-    e.preventDefault();
-});
-
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-    document.body.style.userSelect = '';
-});
-
-document.addEventListener('touchend', () => {
-    isDragging = false;
-    document.body.style.userSelect = '';
-});
-
-// Optional spacebar toggle
-document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-        e.preventDefault();
-        isPlaying ? stopSequencer() : startSequencer();
-    }
-});
-
+/** startSequencer: begin scheduling from step 0 */
 function startSequencer() {
     if (!isPlaying) {
         isPlaying = true;
@@ -289,10 +133,269 @@ function startSequencer() {
     }
 }
 
+/** stopSequencer: stop scheduling and clear highlights */
 function stopSequencer() {
     isPlaying = false;
     clearTimeout(timerID);
     currentStep = 0;
-    // Clear "current" highlight
-    updateStepVisualization(-1);
+    updateStepVisualization(-1); // clear highlight
 }
+
+/** A helper to color the step cell from black (volume=0) to bright orange (volume=1). */
+function updateStepColor(step, volume) {
+    // We'll do a linear blend from #000000 (black) to #ff8c00 (orange).
+    const r0 = 0,   g0 = 0,   b0 = 0;      // black
+    const r1 = 255, g1 = 140, b1 = 0;      // #ff8c00
+    const r = r0 + (r1 - r0) * volume;
+    const g = g0 + (g1 - g0) * volume;
+    const b = b0 + (b1 - b0) * volume;
+    step.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+}
+
+/** randomizeRow: randomize step volumes for a single instrument */
+function randomizeRow(sound) {
+    const steps = document.querySelectorAll(`.sequencer-row[data-sound="${sound}"] .sequencer-step`);
+    steps.forEach((step, idx) => {
+        const isActive = Math.random() > 0.8; // 20% chance
+        if (isActive) {
+            // random volume between 0.1 and 1.0
+            const vol = 0.1 + Math.random() * 0.9;
+            stepVolumes[sound][idx] = vol;
+            step.classList.add('active');
+            updateStepColor(step, vol);
+        } else {
+            stepVolumes[sound][idx] = 0;
+            step.classList.remove('active');
+            updateStepColor(step, 0);
+        }
+    });
+}
+
+/** loadSamples, then enable UI */
+loadSamples().then(() => {
+    console.log('All samples loaded!');
+}).catch(err => {
+    console.error('Error loading samples:', err);
+});
+
+// -------------- Event Listeners -------------- //
+
+// 1) Instrument PAD PREVIEW (click) => triggers the instrument
+padGroups.forEach(group => {
+    const sound = group.dataset.sound;
+    const drumPad = group.querySelector('.drum-pad');
+    const volumeKnob = group.querySelector('.volume-knob');
+    const pitchKnob = group.querySelector('.pitch-knob');
+
+    // Clicking the pad triggers a one-shot preview
+    drumPad.addEventListener('click', () => {
+        // play this instrument
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffers[sound];
+        source.playbackRate.value = sampleSettings[sound].pitch;
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = sampleSettings[sound].volume;
+        source.connect(gainNode).connect(audioContext.destination);
+        source.start(audioContext.currentTime);
+
+        // quick visual feedback
+        drumPad.classList.add('active');
+        setTimeout(() => drumPad.classList.remove('active'), 200);
+    });
+
+    // Volume knob => sets instrument-level volume
+    volumeKnob.addEventListener('input', () => {
+        sampleSettings[sound].volume = volumeKnob.value;
+    });
+
+    // Pitch knob => sets instrument-level pitch
+    pitchKnob.addEventListener('input', () => {
+        sampleSettings[sound].pitch = pitchKnob.value;
+    });
+});
+
+// 2) Step Click => toggle 0 or 0.8 for that step's volume
+sequencerSteps.forEach(step => {
+    step.addEventListener('click', () => {
+        const sound = step.parentElement.dataset.sound;
+        const stepIndex = parseInt(step.dataset.step);
+        if (stepVolumes[sound][stepIndex] === 0) {
+            stepVolumes[sound][stepIndex] = 0.8;
+            step.classList.add('active');
+            updateStepColor(step, 0.8);
+        } else {
+            stepVolumes[sound][stepIndex] = 0;
+            step.classList.remove('active');
+            updateStepColor(step, 0);
+        }
+    });
+});
+
+// 3) Drag logic for volume on each step
+let dragStep = null;
+let dragStartY = 0;
+let dragStartVol = 0;
+const volumeScale = 0.005; // volume units per px drag
+
+// MOUSE
+sequencerSteps.forEach(step => {
+    step.addEventListener('mousedown', e => {
+        e.preventDefault();
+        dragStep = step;
+        dragStartY = e.clientY;
+        const sound = dragStep.parentElement.dataset.sound;
+        const stepIndex = parseInt(dragStep.dataset.step);
+        dragStartVol = stepVolumes[sound][stepIndex];
+        document.body.style.userSelect = 'none';
+    });
+});
+
+document.addEventListener('mousemove', e => {
+    if (!dragStep) return;
+    const sound = dragStep.parentElement.dataset.sound;
+    const stepIndex = parseInt(dragStep.dataset.step);
+
+    const deltaY = dragStartY - e.clientY; // dragging up => positive delta
+    let newVol = dragStartVol + deltaY * volumeScale;
+    newVol = Math.min(1, Math.max(0, newVol));
+    stepVolumes[sound][stepIndex] = newVol;
+
+    if (newVol > 0) dragStep.classList.add('active');
+    else dragStep.classList.remove('active');
+
+    updateStepColor(dragStep, newVol);
+});
+
+document.addEventListener('mouseup', () => {
+    dragStep = null;
+    document.body.style.userSelect = '';
+});
+
+// TOUCH
+sequencerSteps.forEach(step => {
+    step.addEventListener('touchstart', e => {
+        dragStep = step;
+        dragStartY = e.touches[0].clientY;
+        const sound = dragStep.parentElement.dataset.sound;
+        const stepIndex = parseInt(dragStep.dataset.step);
+        dragStartVol = stepVolumes[sound][stepIndex];
+        document.body.style.userSelect = 'none';
+    });
+});
+
+document.addEventListener('touchmove', e => {
+    if (!dragStep) return;
+    const sound = dragStep.parentElement.dataset.sound;
+    const stepIndex = parseInt(dragStep.dataset.step);
+
+    const deltaY = dragStartY - e.touches[0].clientY;
+    let newVol = dragStartVol + deltaY * volumeScale;
+    newVol = Math.min(1, Math.max(0, newVol));
+    stepVolumes[sound][stepIndex] = newVol;
+
+    if (newVol > 0) dragStep.classList.add('active');
+    else dragStep.classList.remove('active');
+
+    updateStepColor(dragStep, newVol);
+    e.preventDefault();
+});
+
+document.addEventListener('touchend', () => {
+    dragStep = null;
+    document.body.style.userSelect = '';
+});
+
+// 4) Start / Stop
+startButton.addEventListener('click', startSequencer);
+stopButton.addEventListener('click', stopSequencer);
+
+// 5) Reset / Random
+document.getElementById('reset').addEventListener('click', () => {
+    sequencerSteps.forEach(step => {
+        step.classList.remove('active');
+        const sound = step.parentElement.dataset.sound;
+        const stepIndex = parseInt(step.dataset.step);
+        stepVolumes[sound][stepIndex] = 0;
+        updateStepColor(step, 0);
+    });
+});
+document.getElementById('randomize').addEventListener('click', () => {
+    Object.keys(sampleFiles).forEach(sound => randomizeRow(sound));
+});
+
+// 6) Tempo drag
+let isDraggingTempo = false;
+let startTempo = 0;
+let startY = 0;
+
+tempoDisplay.addEventListener('mousedown', (e) => {
+    isDraggingTempo = true;
+    startY = e.clientY;
+    startTempo = tempo;
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+});
+document.addEventListener('mousemove', (e) => {
+    if (!isDraggingTempo) return;
+    const deltaY = startY - e.clientY;
+    const newTempo = Math.min(240, Math.max(60, startTempo + deltaY));
+    if (newTempo !== tempo) {
+        tempo = newTempo;
+        tempoDisplay.textContent = tempo;
+        if (isPlaying) {
+            stopSequencer();
+            startSequencer();
+        }
+    }
+});
+document.addEventListener('mouseup', () => {
+    isDraggingTempo = false;
+    document.body.style.userSelect = '';
+});
+
+// Touch-based tempo
+tempoDisplay.addEventListener('touchstart', (e) => {
+    isDraggingTempo = true;
+    startY = e.touches[0].clientY;
+    startTempo = tempo;
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+});
+document.addEventListener('touchmove', (e) => {
+    if (!isDraggingTempo) return;
+    const deltaY = startY - e.touches[0].clientY;
+    const newTempo = Math.min(240, Math.max(60, startTempo + deltaY));
+    if (newTempo !== tempo) {
+        tempo = newTempo;
+        tempoDisplay.textContent = tempo;
+        if (isPlaying) {
+            stopSequencer();
+            startSequencer();
+        }
+    }
+    e.preventDefault();
+});
+document.addEventListener('touchend', () => {
+    isDraggingTempo = false;
+    document.body.style.userSelect = '';
+});
+
+/** Optional spacebar toggles play/stop */
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+        e.preventDefault();
+        isPlaying ? stopSequencer() : startSequencer();
+    }
+});
+
+// 7) On first user click/touch, resume audio context on mobile
+document.addEventListener('click', () => {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}, { once: true });
+document.addEventListener('touchstart', () => {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}, { once: true });
