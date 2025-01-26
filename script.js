@@ -283,22 +283,23 @@ sequencerSteps.forEach(step => {
     });
 });
 
-document.addEventListener('touchmove', e => {
-    if (!dragStep) return;
-    const sound = dragStep.parentElement.dataset.sound;
-    const stepIndex = parseInt(dragStep.dataset.step);
+document.addEventListener('touchmove', (e) => {
+    if (dragStep) {
+        const sound = dragStep.parentElement.dataset.sound;
+        const stepIndex = parseInt(dragStep.dataset.step);
 
-    const deltaY = dragStartY - e.touches[0].clientY;
-    let newVol = dragStartVol + deltaY * volumeScale;
-    newVol = Math.min(1, Math.max(0, newVol));
-    stepVolumes[sound][stepIndex] = newVol;
+        const deltaY = dragStartY - e.touches[0].clientY;
+        let newVol = dragStartVol + deltaY * volumeScale;
+        newVol = Math.min(1, Math.max(0, newVol));
+        stepVolumes[sound][stepIndex] = newVol;
 
-    if (newVol > 0) dragStep.classList.add('active');
-    else dragStep.classList.remove('active');
+        if (newVol > 0) dragStep.classList.add('active');
+        else dragStep.classList.remove('active');
 
-    updateStepColor(dragStep, newVol);
-    e.preventDefault();
-});
+        updateStepColor(dragStep, newVol);
+        e.preventDefault(); // Prevent iOS from scrolling the page
+    }
+}, { passive: false }); // passive:false so preventDefault() is respected
 
 document.addEventListener('touchend', () => {
     dragStep = null;
@@ -321,6 +322,21 @@ document.getElementById('reset').addEventListener('click', () => {
 });
 document.getElementById('randomize').addEventListener('click', () => {
     Object.keys(sampleFiles).forEach(sound => randomizeRow(sound));
+});
+
+// Re-activate individual dice buttons for each instrument
+const diceButtons = document.querySelectorAll('.dice-button');
+diceButtons.forEach((button, index) => {
+    // We'll rely on the same order as in the .inst-labels:
+    // [kick, snare, hihat, tom, clap, rim, cowbell, ride].
+    // If there's an empty label or extra, ensure indices match
+    const sounds = ['kick','snare','hihat','tom','clap','rim','cowbell','ride'];
+    const sound = sounds[index] || 'kick';
+    
+    button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        randomizeRow(sound);
+    });
 });
 
 // 6) Tempo drag

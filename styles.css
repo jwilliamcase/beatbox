@@ -146,7 +146,7 @@ input[type="range"].vertical::-moz-range-thumb:active {
 .inst-label {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: end;
     font-size: 1.2em;
     width: 180px;
     height: 35px;
@@ -222,9 +222,9 @@ input[type="range"].vertical::-moz-range-thumb:active {
 
 /* Chasing animation for current step */
 @keyframes chasing {
-    0%   { box-shadow: 0 0 0px #ff8c00; }
-    50%  { box-shadow: 0 0 15px #ff8c00; }
-    100% { box-shadow: 0 0 0px #ff8c00; }
+    0%   { box-shadow: 0 0 15px #ff8c00; }
+    50%  { box-shadow: 0 0 25px #ff8c00; }
+    100% { box-shadow: 0 0 30px #ff8c00; }
 }
 .sequencer-step.current {
     animation: chasing 0.4s ease-in-out;
